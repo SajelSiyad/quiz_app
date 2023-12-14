@@ -61,6 +61,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
               }
 
               final qnIndex = ref.watch(questionIndex);
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -155,6 +156,8 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                             restartTimer();
                           } else {
                             // navigate to congrates screen
+                            ref.read(totalNumberofQestion.notifier).state =
+                                data.length;
                             Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(
