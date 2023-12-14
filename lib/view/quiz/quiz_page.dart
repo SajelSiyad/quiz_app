@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quiz_app/providers/api_provider.dart';
 import 'package:quiz_app/providers/provider.dart';
+import 'package:quiz_app/utils/colors/app_colors.dart';
 import 'package:quiz_app/utils/spacing/space_sizedbox.dart';
 import 'package:quiz_app/view/quiz/widgets/widgets.dart';
+import 'package:quiz_app/view/result/result_screen.dart';
 
 class QuizPage extends ConsumerStatefulWidget {
   const QuizPage({super.key});
@@ -46,7 +48,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff481450),
+      backgroundColor: AppColors.scaffolBgColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -68,10 +70,12 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                       RotatedBox(
                         quarterTurns: 2,
                         child: LinearProgressIndicator(
-                          backgroundColor: const Color(0xff6C2677),
+                          backgroundColor: AppColors.timerBgColor,
                           value: ((60 - _time) / 60),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            _time < 11 ? Colors.red : const Color(0xffC353D6),
+                            _time < 11
+                                ? AppColors.redColor
+                                : AppColors.timerFillingColor,
                           ),
                           minHeight: 35,
                           borderRadius: const BorderRadius.all(
@@ -112,6 +116,13 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                                 ref.read(selectedButtonIndex.notifier).state =
                                     index;
                                 puaseTimer();
+                                if (ref.watch(selectedButtonIndex) == index) {
+                                  if (data[qnIndex].options[index].isCorrect) {
+                                    ref
+                                        .read(correctAnswerCount.notifier)
+                                        .state++;
+                                  }
+                                }
                               },
                         child: ContainerWidget(
                           question: data[qnIndex].options[index].text,
@@ -119,9 +130,9 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                           color:
                               ref.read(isOptionSelectedProvider) || _time == 0
                                   ? data[qnIndex].options[index].isCorrect
-                                      ? Colors.green
+                                      ? AppColors.greenColor
                                       : ref.watch(selectedButtonIndex) == index
-                                          ? Colors.red
+                                          ? AppColors.redColor
                                           : null
                                   : null,
                         ),
@@ -144,6 +155,11 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                             restartTimer();
                           } else {
                             // navigate to congrates screen
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ResultPage()),
+                                (route) => false);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -169,7 +185,9 @@ class _QuizPageState extends ConsumerState<QuizPage> {
             },
             loading: () {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: AppColors.timerFillingColor,
+                ),
               );
             },
           ),
